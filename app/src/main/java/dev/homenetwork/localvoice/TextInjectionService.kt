@@ -1,6 +1,7 @@
 package dev.homenetwork.localvoice
 
 import android.accessibilityservice.AccessibilityService
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -75,7 +76,15 @@ class TextInjectionService : AccessibilityService() {
         val args = Bundle().apply {
             putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text)
         }
-        return target.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)
+        if (!target.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)) return false
+        // Submit, as if Enter/Search were pressed on the keyboard.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            main.postDelayed({
+                target.refresh()
+                target.performAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_IME_ENTER.id)
+            }, SUBMIT_DELAY_MS)
+        }
+        return true
     }
 
     private fun firstEditable(node: AccessibilityNodeInfo): AccessibilityNodeInfo? {
@@ -92,6 +101,7 @@ class TextInjectionService : AccessibilityService() {
     companion object {
         private const val MAX_ATTEMPTS = 8
         private const val RETRY_DELAY_MS = 250L
+        private const val SUBMIT_DELAY_MS = 150L
 
         @Volatile
         var instance: TextInjectionService? = null
