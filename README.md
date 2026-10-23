@@ -4,6 +4,8 @@
 
 Built for people who turned off Google Assistant for privacy and lost their remote's mic button in the process.
 
+> **Powered by [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx)** from the [Next-gen Kaldi](https://github.com/k2-fsa) project. All the actual speech recognition — the engine and the English model — is their work, open source under Apache-2.0. Local Voice is the glue that connects it to your remote. Huge thanks to that team; if this is useful to you, go give them a star.
+
 ## What it does
 
 - **Remote mic button → text box.** Press the mic button (no need to hold it), speak, and when you stop talking the text appears in whatever search box is on screen and the search is submitted.
