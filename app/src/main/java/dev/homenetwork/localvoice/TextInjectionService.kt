@@ -80,7 +80,7 @@ class TextInjectionService : AccessibilityService() {
     }
 
     private fun insert(text: String): Boolean {
-        val root = rootInActiveWindow?.takeIf { it.packageName != packageName } ?: return false
+        val root = rootInActiveWindow ?: return false
         val target = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)?.takeIf { it.isEditable }
             ?: firstEditable(root)
             ?: return false
