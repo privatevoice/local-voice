@@ -14,6 +14,18 @@
         android:allowBackup="false"
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
 
+        <!-- App-list entry: setup checklist and a box to try it in. -->
+        <activity
+            android:name=".SetupActivity"
+            android:exported="true"
+            android:banner="@drawable/banner">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <!-- Remote mic button: Android TV sends android.speech.action.WEB_SEARCH for KEY_SEARCH. -->
         <activity
             android:name=".VoiceSearchActivity"
@@ -28,11 +40,6 @@
             <intent-filter>
                 <action android:name="android.speech.action.VOICE_SEARCH_HANDS_FREE" />
                 <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 

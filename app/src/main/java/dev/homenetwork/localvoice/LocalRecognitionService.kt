@@ -9,7 +9,6 @@ import android.os.Handler
 import android.os.Looper
 import android.speech.RecognitionService
 import android.speech.SpeechRecognizer
-import android.util.Log
 
 /** System speech recognizer backed by the on-device engine. Apps reach it via SpeechRecognizer. */
 class LocalRecognitionService : RecognitionService() {
@@ -17,9 +16,6 @@ class LocalRecognitionService : RecognitionService() {
     private var listener: Listener? = null
 
     override fun onStartListening(intent: Intent?, callback: Callback) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Log.i(TAG, "onStartListening from ${callback.callingAttributionSource}")
-        }
         listener?.cancel()
         var speechBegun = false
         listener = Listener(
@@ -75,9 +71,5 @@ class LocalRecognitionService : RecognitionService() {
     private fun results(text: String) = Bundle().apply {
         putStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION, arrayListOf(text))
         putFloatArray(SpeechRecognizer.CONFIDENCE_SCORES, floatArrayOf(1f))
-    }
-
-    companion object {
-        private const val TAG = "LocalVoice"
     }
 }

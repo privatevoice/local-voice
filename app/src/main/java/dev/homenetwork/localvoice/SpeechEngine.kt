@@ -20,6 +20,8 @@ object SpeechEngine {
     @Volatile
     private var recognizer: OnlineRecognizer? = null
 
+    val isLoaded: Boolean get() = recognizer != null
+
     fun get(context: Context): OnlineRecognizer =
         recognizer ?: synchronized(this) {
             recognizer ?: OnlineRecognizer(context.applicationContext.assets, config())

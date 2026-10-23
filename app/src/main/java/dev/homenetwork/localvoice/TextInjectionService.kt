@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
@@ -50,6 +51,16 @@ class TextInjectionService : AccessibilityService() {
     private fun toast(message: String) = Toast.makeText(this, message, Toast.LENGTH_LONG).show()
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) = Unit
+
+    /**
+     * Takes over the remote's mic button so it works even while Google's voice search is still
+     * installed. Both the press and the release are consumed so nothing else reacts to it.
+     */
+    override fun onKeyEvent(event: KeyEvent): Boolean {
+        if (event.keyCode !in MIC_KEYS) return false
+        if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) listenAndType()
+        return true
+    }
 
     override fun onInterrupt() = Unit
 
@@ -102,6 +113,9 @@ class TextInjectionService : AccessibilityService() {
         private const val MAX_ATTEMPTS = 8
         private const val RETRY_DELAY_MS = 250L
         private const val SUBMIT_DELAY_MS = 150L
+
+        // Android TV remotes send SEARCH for the mic button; some send VOICE_ASSIST.
+        private val MIC_KEYS = setOf(KeyEvent.KEYCODE_SEARCH, KeyEvent.KEYCODE_VOICE_ASSIST)
 
         @Volatile
         var instance: TextInjectionService? = null
