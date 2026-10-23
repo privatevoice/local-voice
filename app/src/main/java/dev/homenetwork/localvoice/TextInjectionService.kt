@@ -16,22 +16,45 @@ import android.widget.Toast
  */
 class TextInjectionService : AccessibilityService() {
 
+    private var listener: Listener? = null
+
     override fun onServiceConnected() {
         instance = this
+        // This service stays running, so load the model now rather than on the first button press.
+        Thread({ runCatching { SpeechEngine.get(this) } }, "local-voice-preload").start()
     }
 
     override fun onDestroy() {
+        listener?.cancel()
         if (instance === this) instance = null
         super.onDestroy()
     }
+
+    /** Listens once (from this always-on service, which may use the mic) and types the result. */
+    fun listenAndType() {
+        listener?.cancel()
+        listener = Listener(
+            context = this,
+            onReady = {},
+            onPartial = {},
+            onFinal = { text ->
+                main.post {
+                    if (text.isEmpty()) toast("Didn't catch that") else insertWhenReady(text)
+                }
+            },
+            onError = { message -> main.post { toast(message) } },
+        ).also { it.start() }
+    }
+
+    private fun toast(message: String) = Toast.makeText(this, message, Toast.LENGTH_LONG).show()
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) = Unit
 
     override fun onInterrupt() = Unit
 
     /**
-     * Types [text] into the app on screen once our popup has closed and that app's window is
-     * active again (while the popup covers it, its window is hidden from accessibility).
+     * Types [text] into the app on screen, retrying briefly until that app's window is active
+     * (it is hidden from accessibility while any window of ours covers it).
      * Shows what was heard if there is nowhere to type it.
      */
     fun insertWhenReady(text: String, attempt: Int = 0) {
@@ -39,7 +62,7 @@ class TextInjectionService : AccessibilityService() {
             when {
                 insert(text) -> Unit
                 attempt < MAX_ATTEMPTS -> insertWhenReady(text, attempt + 1)
-                else -> Toast.makeText(this, "Heard: $text (no text box on screen)", Toast.LENGTH_LONG).show()
+                else -> toast("Heard: $text (no text box on screen)")
             }
         }, RETRY_DELAY_MS)
     }
