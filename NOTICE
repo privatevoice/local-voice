@@ -1,0 +1,15 @@
+Local Voice
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This product bundles third-party components:
+
+sherpa-onnx (https://github.com/k2-fsa/sherpa-onnx)
+  Next-gen Kaldi speech recognition toolkit, including ONNX Runtime native libraries.
+  Apache License 2.0.
+
+Streaming Zipformer English model "sherpa-onnx-streaming-zipformer-en-2023-06-26"
+  (https://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models)
+  Apache License 2.0.
+
+ONNX Runtime (https://github.com/microsoft/onnxruntime), bundled inside sherpa-onnx.
+  MIT License.
