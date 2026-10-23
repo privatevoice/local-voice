@@ -1,6 +1,7 @@
 package dev.homenetwork.localvoice
 
 import android.accessibilityservice.AccessibilityService
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -19,9 +20,19 @@ import android.widget.Toast
 class TextInjectionService : AccessibilityService() {
 
     private var listener: Listener? = null
+    private var learning: ((Int) -> Unit)? = null
 
     override fun onServiceConnected() {
         instance = this
+    }
+
+    /** Treats the next non-navigation key from the remote as its mic button and remembers it. */
+    fun learnMicButton(onLearned: (Int) -> Unit) {
+        learning = onLearned
+    }
+
+    fun stopLearning() {
+        learning = null
     }
 
     override fun onDestroy() {
@@ -54,7 +65,16 @@ class TextInjectionService : AccessibilityService() {
      * installed. Both the press and the release are consumed so nothing else reacts to it.
      */
     override fun onKeyEvent(event: KeyEvent): Boolean {
-        if (event.keyCode !in MIC_KEYS) return false
+        learning?.let { onLearned ->
+            if (event.keyCode in NAVIGATION_KEYS) return false
+            if (event.action == KeyEvent.ACTION_DOWN) {
+                learning = null
+                prefs(this).edit().putInt(PREF_LEARNED_KEY, event.keyCode).apply()
+                main.post { onLearned(event.keyCode) }
+            }
+            return true
+        }
+        if (event.keyCode !in MIC_KEYS && event.keyCode != learnedKey(this)) return false
         if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) listenAndType()
         return true
     }
@@ -111,8 +131,28 @@ class TextInjectionService : AccessibilityService() {
         private const val RETRY_DELAY_MS = 250L
         private const val SUBMIT_DELAY_MS = 150L
 
-        // Android TV remotes send SEARCH for the mic button; some send VOICE_ASSIST.
-        private val MIC_KEYS = setOf(KeyEvent.KEYCODE_SEARCH, KeyEvent.KEYCODE_VOICE_ASSIST)
+        private const val PREF_LEARNED_KEY = "learned_mic_key"
+
+        // Android TV remotes send SEARCH for the mic button; some send VOICE_ASSIST or ASSIST.
+        // Other remotes are handled by learning their key on the setup screen.
+        private val MIC_KEYS =
+            setOf(KeyEvent.KEYCODE_SEARCH, KeyEvent.KEYCODE_VOICE_ASSIST, KeyEvent.KEYCODE_ASSIST)
+
+        // Never learned as the mic button, so the setup screen stays usable while learning.
+        private val NAVIGATION_KEYS = setOf(
+            KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_LEFT,
+            KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER,
+            KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_HOME, KeyEvent.KEYCODE_MENU,
+            KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.KEYCODE_VOLUME_MUTE,
+            KeyEvent.KEYCODE_POWER,
+        )
+
+        private fun prefs(context: Context) =
+            context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+
+        /** The mic key learned on the setup screen, or KEYCODE_UNKNOWN. */
+        fun learnedKey(context: Context) =
+            prefs(context).getInt(PREF_LEARNED_KEY, KeyEvent.KEYCODE_UNKNOWN)
 
         @Volatile
         var instance: TextInjectionService? = null

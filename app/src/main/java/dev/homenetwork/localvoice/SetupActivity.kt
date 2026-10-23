@@ -11,6 +11,7 @@ import android.os.Looper
 import android.provider.Settings
 import android.text.InputType
 import android.util.TypedValue
+import android.view.KeyEvent
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
@@ -25,12 +26,14 @@ class SetupActivity : Activity() {
     private lateinit var micStatus: TextView
     private lateinit var a11yStatus: TextView
     private lateinit var modelStatus: TextView
+    private lateinit var buttonStatus: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         micStatus = body()
         a11yStatus = body()
         modelStatus = body()
+        buttonStatus = body()
 
         val column = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -53,6 +56,8 @@ class SetupActivity : Activity() {
                 setTextColor(Color.GRAY)
             })
             addView(section("3. Speech model", modelStatus, null))
+            addView(section("4. Mic button (only if pressing it does nothing)", buttonStatus,
+                button("Learn my mic button", ::learnMicButton)))
             addView(label("Try it", 22f, Color.WHITE).apply { setPadding(0, dp(24), 0, dp(8)) })
             addView(body().apply { text = "Select the box below, press the remote's mic button and say something." })
             addView(EditText(context).apply {
@@ -70,12 +75,41 @@ class SetupActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        showLearnedKey()
         refresh()
     }
 
     override fun onPause() {
         super.onPause()
+        TextInjectionService.instance?.stopLearning()
         main.removeCallbacksAndMessages(null)
+    }
+
+    private fun learnMicButton() {
+        val service = TextInjectionService.instance
+        if (service == null) {
+            buttonStatus.text = "Turn on accessibility (step 2) first."
+            return
+        }
+        buttonStatus.text = "Press your remote's mic button now…"
+        val timeout = Runnable {
+            service.stopLearning()
+            buttonStatus.text = "No button detected. On this device the mic button may not reach apps."
+        }
+        main.postDelayed(timeout, LEARN_TIMEOUT_MS)
+        service.learnMicButton { keyCode ->
+            main.removeCallbacks(timeout)
+            buttonStatus.text = "✓ Learned ${KeyEvent.keyCodeToString(keyCode)}. Try it below."
+        }
+    }
+
+    private fun showLearnedKey() {
+        val key = TextInjectionService.learnedKey(this)
+        buttonStatus.text = if (key == KeyEvent.KEYCODE_UNKNOWN) {
+            "Standard mic buttons work automatically."
+        } else {
+            "✓ Using ${KeyEvent.keyCodeToString(key)} as the mic button"
+        }
     }
 
     private fun refresh() {
@@ -120,5 +154,6 @@ class SetupActivity : Activity() {
 
     companion object {
         private const val REQUEST_MIC = 1
+        private const val LEARN_TIMEOUT_MS = 10_000L
     }
 }

@@ -16,7 +16,12 @@ Built for people who turned off Google Assistant for privacy and lost their remo
 
 ## Compatibility
 
-Tested on an **onn 4K Plus** (Google TV, Android 14). It should work on other Android TV / Google TV devices running Android 7+, but that's untested — reports welcome.
+Tested on an **onn 4K Plus** (Google TV, Android 14). It should work on other Android TV / Google TV devices running Android 7+, but that's untested — reports welcome (open an issue with your box and whether it worked).
+
+Two things have to be true on your box:
+
+- **The mic button has to reach apps.** Standard mic buttons (`SEARCH`, `VOICE_ASSIST`, `ASSIST` key codes) work automatically; for any other remote, use **Learn my mic button** on the setup screen. Fire TV's Alexa button is handled by Amazon's system and never reaches apps, so Fire TV won't work.
+- **The remote's microphone has to switch on for apps.** Google TV devices (onn, Chromecast with Google TV, Google TV Streamer) do this; other boxes should, but haven't been tried.
 
 Two downloads, pick the one for your box's CPU:
 
@@ -44,7 +49,8 @@ English only for now (other languages are possible with other sherpa-onnx models
    1. **Allow microphone.**
    2. **Open accessibility settings** and turn on *Local Voice*.
       If the switch is greyed out ("restricted setting"), go to `Settings > Apps > Local Voice`, press the **⋮** menu → **Allow restricted settings**, then try again. Android does this for apps installed outside the Play Store.
-   3. Wait for **Speech model: ✓ Ready** (about 10 seconds).
+   3. The speech model loads the first time you press the mic button.
+   4. Only if pressing the mic button does nothing: choose **Learn my mic button** and press it.
 5. Select the **Try it** box, press the remote's mic button, and speak.
 
 ### Option B — with adb (one command)
@@ -76,7 +82,7 @@ Undo with `adb shell pm enable com.google.android.katniss`.
 
 ## How it works
 
-1. The accessibility service intercepts the remote's mic key (`KEYCODE_SEARCH` / `KEYCODE_VOICE_ASSIST`). As a fallback the app also answers Android TV's `android.speech.action.WEB_SEARCH` intent.
+1. The accessibility service intercepts the remote's mic key (`KEYCODE_SEARCH`, `KEYCODE_VOICE_ASSIST`, `KEYCODE_ASSIST`, or the key learned on the setup screen). As a fallback the app also answers Android TV's `android.speech.action.WEB_SEARCH` intent.
 2. It starts recording at once with the `VOICE_RECOGNITION` audio source — that's what tells Android TV to switch on the remote's microphone — and loads the speech model in parallel.
 3. A small [Silero VAD](https://github.com/snakers4/silero-vad) model detects when you stop talking; the utterance is then transcribed by Moonshine.
 4. The text is placed in the focused text field (or the first text field on screen) with an accessibility `SET_TEXT` action, followed by an IME "Enter" action.

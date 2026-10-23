@@ -21,8 +21,8 @@ android {
         applicationId = "dev.homenetwork.localvoice"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.1.1"
     }
 
     // One APK per CPU type: 32-bit for boxes like the onn 4K, 64-bit for most others.
