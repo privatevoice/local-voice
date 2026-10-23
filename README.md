@@ -4,7 +4,7 @@
 
 Built for people who turned off Google Assistant for privacy and lost their remote's mic button in the process.
 
-> **Powered by [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx)** from the [Next-gen Kaldi](https://github.com/k2-fsa) project. All the actual speech recognition engine work is theirs (the English model is [Moonshine](https://github.com/moonshine-ai/moonshine)), open source under Apache-2.0. Local Voice is the glue that connects it to your remote. Huge thanks to that team; if this is useful to you, go give them a star.
+> **Powered by [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx)** from the [Next-gen Kaldi](https://github.com/k2-fsa) project and the **[Moonshine](https://github.com/moonshine-ai/moonshine)** speech model from Moonshine AI. The speech recognition itself — the engine and the model — is their open-source work (Apache-2.0 and MIT). Local Voice is the glue that connects it to your remote. Huge thanks to both teams; if this is useful to you, go give them a star.
 
 ## What it does
 
