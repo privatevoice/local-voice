@@ -35,7 +35,11 @@ English only for now (other languages are possible with other sherpa-onnx models
 
 1. Install **Downloader** (by AFTVnews) from the Play Store.
 2. Allow it to install apps: `Settings > Apps > Security & restrictions > Unknown sources > Downloader`.
-3. In Downloader, enter the APK link from the [Releases](../../releases) page and install it.
+3. In Downloader, enter the link for your box and install it (these always point to the newest version):
+   - 32-bit (onn 4K / 4K Plus, most budget boxes):
+     `github.com/privatevoice/local-voice/releases/latest/download/local-voice-armeabi-v7a.apk`
+   - 64-bit (e.g. NVIDIA Shield):
+     `github.com/privatevoice/local-voice/releases/latest/download/local-voice-arm64-v8a.apk`
 4. Open **Local Voice** from your app list and follow the checklist:
    1. **Allow microphone.**
    2. **Open accessibility settings** and turn on *Local Voice*.
