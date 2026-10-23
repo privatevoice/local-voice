@@ -22,8 +22,6 @@ class TextInjectionService : AccessibilityService() {
 
     override fun onServiceConnected() {
         instance = this
-        // This service stays running, so load the model now rather than on the first button press.
-        Thread({ runCatching { SpeechEngine.get(this) } }, "local-voice-preload").start()
     }
 
     override fun onDestroy() {
@@ -38,7 +36,6 @@ class TextInjectionService : AccessibilityService() {
         listener = Listener(
             context = this,
             onReady = {},
-            onPartial = {},
             onFinal = { text ->
                 main.post {
                     if (text.isEmpty()) toast("Didn't catch that") else insertWhenReady(text)

@@ -17,18 +17,13 @@ class LocalRecognitionService : RecognitionService() {
 
     override fun onStartListening(intent: Intent?, callback: Callback) {
         listener?.cancel()
-        var speechBegun = false
         listener = Listener(
             context = this,
             audioContext = callerContext(callback),
-            onReady = { post { callback.readyForSpeech(Bundle()) } },
-            onPartial = { text ->
+            onReady = {
                 post {
-                    if (!speechBegun) {
-                        speechBegun = true
-                        callback.beginningOfSpeech()
-                    }
-                    callback.partialResults(results(text))
+                    callback.readyForSpeech(Bundle())
+                    callback.beginningOfSpeech()
                 }
             },
             onFinal = { text ->

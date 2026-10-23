@@ -82,12 +82,12 @@ class SetupActivity : Activity() {
         val mic = checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
         micStatus.text = if (mic) "✓ Allowed" else "✗ Not allowed yet"
         a11yStatus.text = if (TextInjectionService.instance != null) "✓ On" else "✗ Off"
-        modelStatus.text = when {
-            SpeechEngine.isLoaded -> "✓ Ready"
-            TextInjectionService.instance != null -> "Loading… (about 10 seconds)"
-            else -> "Loads once accessibility is on"
+        modelStatus.text = if (SpeechEngine.isLoaded) {
+            "✓ Loaded (unloads after 3 idle minutes)"
+        } else {
+            "Loads when you press the mic button, while you speak"
         }
-        if (!SpeechEngine.isLoaded) main.postDelayed(::refresh, 1000)
+        main.postDelayed(::refresh, 1000)
     }
 
     private fun section(title: String, status: TextView, action: View?) = LinearLayout(this).apply {

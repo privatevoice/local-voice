@@ -4,12 +4,13 @@
 
 Built for people who turned off Google Assistant for privacy and lost their remote's mic button in the process.
 
-> **Powered by [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx)** from the [Next-gen Kaldi](https://github.com/k2-fsa) project. All the actual speech recognition — the engine and the English model — is their work, open source under Apache-2.0. Local Voice is the glue that connects it to your remote. Huge thanks to that team; if this is useful to you, go give them a star.
+> **Powered by [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx)** from the [Next-gen Kaldi](https://github.com/k2-fsa) project. All the actual speech recognition engine work is theirs (the English model is [Moonshine](https://github.com/moonshine-ai/moonshine)), open source under Apache-2.0. Local Voice is the glue that connects it to your remote. Huge thanks to that team; if this is useful to you, go give them a star.
 
 ## What it does
 
 - **Remote mic button → text box.** Press the mic button (no need to hold it), speak, and when you stop talking the text appears in whatever search box is on screen and the search is submitted.
-- **On-device speech recognition** using [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) (Next-gen Kaldi) with a streaming Zipformer English model, small enough for budget boxes.
+- **On-device speech recognition** using [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) (Next-gen Kaldi) running the [Moonshine](https://github.com/moonshine-ai/moonshine) base English model — accurate on titles and acronyms ("Law and Order SVU") and about a second to transcribe on a budget box.
+- **Light when idle.** The model loads only when you press the button — while you're talking, so you don't wait for it — and unloads after 3 quiet minutes. Idle memory is ~12 MB.
 - **No internet permission.** Android won't let the app send anything off the device. You can check: `Settings > Apps > Local Voice > Permissions` lists only Microphone.
 - **Works with Google's voice search still installed** — Local Voice takes over the mic button through its accessibility service. (You can still disable Google's voice search for privacy; see below.)
 
@@ -65,15 +66,15 @@ Undo with `adb shell pm enable com.google.android.katniss`.
 ## Known limitations
 
 - **In-app mic buttons** (e.g. the microphone icon inside Nuvio's search screen) currently fail with "microphone permission required" on Android 14 because of how Android checks permissions for third-party recognizers. **Use the remote's mic button instead** — it works everywhere.
-- The speech model stays loaded so the button responds instantly; that uses about **130 MB of RAM**. After a reboot it takes ~10 seconds to load.
+- While loaded (from a button press until 3 idle minutes later) the model uses about **230 MB of RAM**.
 - A few apps ignore the automatic "Enter" after typing; in those, press Enter/Search on the keyboard yourself.
-- Accuracy is good for titles and short phrases, not perfect — it's a small model running on a TV box.
+- Accuracy is good for titles and short phrases, not perfect — it's a small model running on a TV box (e.g. "Dune" can come out as "June").
 
 ## How it works
 
 1. The accessibility service intercepts the remote's mic key (`KEYCODE_SEARCH` / `KEYCODE_VOICE_ASSIST`). As a fallback the app also answers Android TV's `android.speech.action.WEB_SEARCH` intent.
-2. It records with the `VOICE_RECOGNITION` audio source — that's what tells Android TV to switch on the remote's microphone.
-3. Audio streams into the sherpa-onnx recognizer; recording stops after a short silence.
+2. It starts recording at once with the `VOICE_RECOGNITION` audio source — that's what tells Android TV to switch on the remote's microphone — and loads the speech model in parallel.
+3. A small [Silero VAD](https://github.com/snakers4/silero-vad) model detects when you stop talking; the utterance is then transcribed by Moonshine.
 4. The text is placed in the focused text field (or the first text field on screen) with an accessibility `SET_TEXT` action, followed by an IME "Enter" action.
 
 The accessibility service only acts when you press the mic button. It doesn't log or store anything, and the app has no network access to send anything with.
@@ -83,7 +84,7 @@ The accessibility service only acts when you press the mic button. It doesn't lo
 Requires JDK 17 and the Android SDK (platform 34).
 
 ```sh
-./scripts/fetch-deps.sh          # downloads sherpa-onnx (AAR) and the English model
+./scripts/fetch-deps.sh          # downloads sherpa-onnx (AAR), Moonshine base English and Silero VAD
 ./gradlew assembleRelease        # APKs in app/build/outputs/apk/release/
 ```
 
@@ -91,7 +92,9 @@ Release builds are signed with the key described by the file at `$LOCAL_VOICE_SI
 
 ## Credits & license
 
-- [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) and the streaming Zipformer English model — Apache-2.0
+- [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) — Apache-2.0
+- [Moonshine](https://github.com/moonshine-ai/moonshine) base English model (via sherpa-onnx) — MIT
+- [Silero VAD](https://github.com/snakers4/silero-vad) — MIT
 - [ONNX Runtime](https://github.com/microsoft/onnxruntime) — MIT
 
 Local Voice is licensed under the [Apache License 2.0](LICENSE). See [NOTICE](NOTICE).
