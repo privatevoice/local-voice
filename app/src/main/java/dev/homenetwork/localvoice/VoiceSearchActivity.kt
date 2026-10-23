@@ -72,9 +72,23 @@ class VoiceSearchActivity : Activity() {
             onPartial = { text -> main.post { transcript.text = text } },
             onFinal = { text ->
                 main.post {
-                    status.text = if (text.isEmpty()) "Didn't catch that" else "Heard"
                     transcript.text = text
-                    main.postDelayed(::finish, CLOSE_DELAY_MS)
+                    val injector = TextInjectionService.instance
+                    when {
+                        text.isEmpty() -> {
+                            status.text = "Didn't catch that"
+                            main.postDelayed(::finish, CLOSE_DELAY_MS)
+                        }
+                        injector != null -> {
+                            // Close first so the app underneath gets its window and focus back.
+                            injector.insertWhenReady(text)
+                            finish()
+                        }
+                        else -> {
+                            status.text = "Heard (turn on Local Voice in Accessibility to type it)"
+                            main.postDelayed(::finish, CLOSE_DELAY_MS)
+                        }
+                    }
                 }
             },
             onError = { message ->

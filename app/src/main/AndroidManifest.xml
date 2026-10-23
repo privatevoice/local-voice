@@ -36,6 +36,21 @@
             </intent-filter>
         </activity>
 
+        <!-- Types results into the on-screen text field; also grants the "in use" status
+             LocalRecognitionService needs to open the mic for apps in the foreground. -->
+        <service
+            android:name=".TextInjectionService"
+            android:exported="true"
+            android:label="Local Voice"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/text_injection_service" />
+        </service>
+
         <!-- System speech recognizer, used by apps like Nuvio via SpeechRecognizer. -->
         <service
             android:name=".LocalRecognitionService"

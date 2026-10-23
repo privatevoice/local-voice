@@ -5,15 +5,20 @@ import android.content.Context
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import android.os.Build
 import android.os.SystemClock
 import android.util.Log
 
 /**
  * Records one utterance and transcribes it on-device.
  * Callbacks arrive on the recording thread; callers post to their own thread.
+ *
+ * [audioContext] is the context the recording is attributed to. A RecognitionService passes
+ * a context chained to the calling app, so the mic is opened on that (foreground) app's behalf.
  */
 class Listener(
     private val context: Context,
+    private val audioContext: Context = context,
     private val onReady: () -> Unit,
     private val onPartial: (String) -> Unit,
     private val onFinal: (String) -> Unit,
@@ -52,13 +57,18 @@ class Listener(
         val rate = SpeechEngine.SAMPLE_RATE
         val minBuffer = AudioRecord.getMinBufferSize(rate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
         // VOICE_RECOGNITION (not MIC) is what makes Android TV switch the remote's microphone on.
-        val audio = AudioRecord(
-            MediaRecorder.AudioSource.VOICE_RECOGNITION,
-            rate,
-            AudioFormat.CHANNEL_IN_MONO,
-            AudioFormat.ENCODING_PCM_16BIT,
-            maxOf(minBuffer, rate / 5 * 2),
-        )
+        val audio = AudioRecord.Builder().apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) setContext(audioContext)
+            setAudioSource(MediaRecorder.AudioSource.VOICE_RECOGNITION)
+            setAudioFormat(
+                AudioFormat.Builder()
+                    .setSampleRate(rate)
+                    .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                    .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                    .build()
+            )
+            setBufferSizeInBytes(maxOf(minBuffer, rate / 5 * 2))
+        }.build()
         if (audio.state != AudioRecord.STATE_INITIALIZED) {
             audio.release()
             if (!cancelled) onError("Microphone unavailable")

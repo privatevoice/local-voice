@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="a11y_description">Types what you say with the remote\'s mic button into the text field on screen. Speech is recognized on this device; the app has no internet access.</string>
+</resources>
