@@ -6,3 +6,4 @@ local.properties
 *.apk
 app/libs/*.aar
 app/src/main/assets/model/
+.kotlin/

@@ -49,8 +49,12 @@ jobs:
       - name: Rename APKs
         run: |
           mkdir dist
-          for abi in armeabi-v7a arm64-v8a; do
-            cp "app/build/outputs/apk/release/app-$abi-release.apk" "dist/local-voice-$abi.apk"
+          # local-voice-<abi>.apk = Local Voice Setup (installs the app so its accessibility
+          # service can be turned on); local-voice-app-<abi>.apk = the bare app, for adb.
+          for flavor in armeabiV7a:armeabi-v7a arm64V8a:arm64-v8a; do
+            abi="${flavor#*:}"
+            cp "installer/build/outputs/apk/${flavor%%:*}/release/installer-${flavor%%:*}-release.apk" "dist/local-voice-$abi.apk"
+            cp "app/build/outputs/apk/release/app-$abi-release.apk" "dist/local-voice-app-$abi.apk"
           done
           (cd dist && sha256sum *.apk > SHA256SUMS.txt)
 
@@ -60,4 +64,4 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" dist/* \
             --title "Local Voice $GITHUB_REF_NAME" \
-            --notes "Pick the APK for your box: armeabi-v7a (32-bit, e.g. onn 4K) or arm64-v8a (64-bit, e.g. NVIDIA Shield). See the README for setup. SHA256SUMS.txt lists checksums."
+            --notes "Install local-voice-<abi>.apk (Local Voice Setup) on the TV, open it and press Install: armeabi-v7a for 32-bit boxes (e.g. onn 4K), arm64-v8a for 64-bit (e.g. NVIDIA Shield). local-voice-app-<abi>.apk is the bare app for adb installs. See the README. SHA256SUMS.txt lists checksums."

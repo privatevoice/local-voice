@@ -13,4 +13,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "local-voice"
-include(":app")
+include(":app", ":installer")

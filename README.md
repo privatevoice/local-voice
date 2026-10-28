@@ -30,7 +30,9 @@ Two downloads, pick the one for your box's CPU:
 | `local-voice-armeabi-v7a.apk` | 32-bit boxes — onn 4K / 4K Plus and many budget sticks |
 | `local-voice-arm64-v8a.apk` | 64-bit boxes — e.g. NVIDIA Shield |
 
-Not sure? Try `arm64-v8a` first; if Android says the app isn't compatible, use `armeabi-v7a`.
+Not sure? Try `arm64-v8a` first; if it says the app isn't compatible, use `armeabi-v7a`.
+
+These downloads are **Local Voice Setup**, a small installer with Local Voice inside. Why the extra step: Android 13+ blocks the accessibility service of any app opened straight from a downloaded file ("Restricted setting"), and Android TV has no switch to undo that. Apps installed by another app, the way app stores do it, aren't blocked, so Local Voice Setup installs Local Voice that way. The bare app (`local-voice-app-<abi>.apk`) is also on the release page for adb installs.
 
 English only for now (other languages are possible with other sherpa-onnx models).
 
@@ -40,34 +42,31 @@ English only for now (other languages are possible with other sherpa-onnx models
 
 1. Install **Downloader** (by AFTVnews) from the Play Store.
 2. Allow it to install apps: `Settings > Apps > Security & restrictions > Unknown sources > Downloader`.
-3. In Downloader, enter the link for your box and install it (these always point to the newest version):
-   - 32-bit (onn 4K / 4K Plus, most budget boxes):
+3. In Downloader, enter the code or link for your box and install it (these always point to the newest version):
+   - 32-bit (onn 4K / 4K Plus, most budget boxes): code **2007902**, or
      `github.com/privatevoice/local-voice/releases/latest/download/local-voice-armeabi-v7a.apk`
    - 64-bit (e.g. NVIDIA Shield):
      `github.com/privatevoice/local-voice/releases/latest/download/local-voice-arm64-v8a.apk`
-4. Open **Local Voice** from your app list and follow the checklist:
+4. Open **Local Voice Setup** and follow it:
+   1. **Allow installing** — turn on *Local Voice Setup* in the screen that opens, then go back.
+   2. **Install Local Voice.** (Already installed Local Voice straight from Downloader before? It will offer **Remove old copy** first.)
+   3. **Open Local Voice.** You can uninstall Local Voice Setup afterwards; to update later, install the new Setup and press **Reinstall / update**.
+5. In **Local Voice**, follow the checklist:
    1. **Allow microphone.**
    2. **Open accessibility settings** and turn on *Local Voice*.
-      If Android says **"Restricted setting"**, that's normal for apps installed outside the Play Store:
-      1. Press **OK**. This first blocked try is what makes the unlock option appear.
-      2. Back in Local Voice, choose **Open app info** (or go to `Settings > Apps > See all apps > Local Voice`), scroll to the **bottom** and choose **Allow restricted settings**. On phones it's under the **⋮** menu instead.
-      3. Go back to accessibility settings and turn on *Local Voice*.
-
-      If **Allow restricted settings** never shows up, your box hides it. Use [Option B](#option-b--with-adb-one-command) instead, or just run this one adb command and then turn the switch on yourself:
-      `adb shell appops set dev.homenetwork.localvoice ACCESS_RESTRICTED_SETTINGS allow`
    3. The speech model loads the first time you press the mic button.
    4. Only if pressing the mic button does nothing: choose **Learn my mic button** and press it.
-5. Select the **Try it** box, press the remote's mic button, and speak.
+6. Select the **Try it** box, press the remote's mic button, and speak.
 
 ### Option B — with adb (one command)
 
 With [adb](https://developer.android.com/tools/adb) connected to the TV:
 
 ```sh
-./scripts/setup.sh local-voice-armeabi-v7a.apk
+./scripts/setup.sh local-voice-app-armeabi-v7a.apk
 ```
 
-This installs the app, allows the mic, turns on the accessibility service, and sets Local Voice as the system speech recognizer.
+This installs the bare app (`local-voice-app-<abi>.apk` from the release page), allows the mic, turns on the accessibility service, and sets Local Voice as the system speech recognizer.
 
 ## Optional: turn off Google's voice search
 
@@ -101,7 +100,7 @@ Requires JDK 17 and the Android SDK (platform 34).
 
 ```sh
 ./scripts/fetch-deps.sh          # downloads sherpa-onnx (AAR), Moonshine base English and Silero VAD
-./gradlew assembleRelease        # APKs in app/build/outputs/apk/release/
+./gradlew assembleRelease        # app: app/build/outputs/apk/release/, Setup: installer/build/outputs/apk/
 ```
 
 Release builds are signed with the key described by the file at `$LOCAL_VOICE_SIGNING` (properties: `storeFile`, `storePassword`, `keyAlias`, `keyPassword`); without one they fall back to the debug key.
