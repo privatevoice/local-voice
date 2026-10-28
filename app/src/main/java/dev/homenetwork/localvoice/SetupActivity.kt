@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -51,9 +52,14 @@ class SetupActivity : Activity() {
                 startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
             }))
             addView(body().apply {
-                text = "Turn on \"Local Voice\". If it is greyed out (installed outside the Play Store): " +
-                    "Settings > Apps > Local Voice > ⋮ > Allow restricted settings, then try again."
+                text = "Turn on \"Local Voice\". If Android says \"Restricted setting\" (apps installed " +
+                    "outside the Play Store), press OK, then open app info below, scroll to the bottom, " +
+                    "choose \"Allow restricted settings\" and try again. The option only appears after " +
+                    "that first blocked try. Not there? Use the adb setup on the project page."
                 setTextColor(Color.GRAY)
+            })
+            addView(button("Open app info") {
+                startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null)))
             })
             addView(section("3. Speech model", modelStatus, null))
             addView(section("4. Mic button (only if pressing it does nothing)", buttonStatus,

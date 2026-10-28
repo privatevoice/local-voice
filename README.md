@@ -48,7 +48,13 @@ English only for now (other languages are possible with other sherpa-onnx models
 4. Open **Local Voice** from your app list and follow the checklist:
    1. **Allow microphone.**
    2. **Open accessibility settings** and turn on *Local Voice*.
-      If the switch is greyed out ("restricted setting"), go to `Settings > Apps > Local Voice`, press the **⋮** menu → **Allow restricted settings**, then try again. Android does this for apps installed outside the Play Store.
+      If Android says **"Restricted setting"**, that's normal for apps installed outside the Play Store:
+      1. Press **OK**. This first blocked try is what makes the unlock option appear.
+      2. Back in Local Voice, choose **Open app info** (or go to `Settings > Apps > See all apps > Local Voice`), scroll to the **bottom** and choose **Allow restricted settings**. On phones it's under the **⋮** menu instead.
+      3. Go back to accessibility settings and turn on *Local Voice*.
+
+      If **Allow restricted settings** never shows up, your box hides it. Use [Option B](#option-b--with-adb-one-command) instead, or just run this one adb command and then turn the switch on yourself:
+      `adb shell appops set dev.homenetwork.localvoice ACCESS_RESTRICTED_SETTINGS allow`
    3. The speech model loads the first time you press the mic button.
    4. Only if pressing the mic button does nothing: choose **Learn my mic button** and press it.
 5. Select the **Try it** box, press the remote's mic button, and speak.
