@@ -53,7 +53,7 @@ English only for now (other languages are possible with other sherpa-onnx models
    3. **Open Local Voice.** You can uninstall Local Voice Setup afterwards; to update later, install the new Setup and press **Reinstall / update**.
 5. In **Local Voice**, follow the checklist:
    1. **Allow microphone.**
-   2. **Open accessibility settings** and turn on *Local Voice*.
+   2. **Open accessibility settings**, scroll **all the way to the bottom** of the list, select *Local Voice* and turn it on.
    3. The speech model loads the first time you press the mic button.
    4. Only if pressing the mic button does nothing: choose **Learn my mic button** and press it.
 6. Select the **Try it** box, press the remote's mic button, and speak.

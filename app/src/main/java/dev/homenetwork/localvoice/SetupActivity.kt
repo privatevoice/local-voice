@@ -52,7 +52,7 @@ class SetupActivity : Activity() {
                 startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
             }))
             addView(body().apply {
-                text = "Turn on \"Local Voice\". If Android says \"Restricted setting\", this copy was " +
+                text = "Scroll all the way to the bottom of the list and turn on \"Local Voice\". If Android says \"Restricted setting\", this copy was " +
                     "installed straight from the download, which Android blocks. Fix: open \"Local " +
                     "Voice Setup\" (the download from the project page) — it removes this copy and " +
                     "installs one you can turn on. On phones you can instead use app info below: " +
