@@ -27,8 +27,8 @@ android {
         minSdk = 24
         targetSdk = 34
         // Keep in step with app/build.gradle.kts.
-        versionCode = 4
-        versionName = "0.1.3"
+        versionCode = 5
+        versionName = "0.1.4"
     }
 
     // One installer per CPU type, each carrying the matching Local Voice APK.

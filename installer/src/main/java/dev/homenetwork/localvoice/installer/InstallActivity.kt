@@ -115,7 +115,8 @@ class InstallActivity : Activity() {
                 action.text = "Remove old copy"
             }
             else -> {
-                status.text = "✓ Local Voice is installed. Open it and follow its checklist."
+                status.text = "✓ Local Voice is installed. Open it and follow its checklist — in " +
+                    "accessibility settings, Local Voice is at the very bottom of the list."
                 action.text = "Reinstall / update"
                 open.visibility = android.view.View.VISIBLE
                 open.requestFocus()
